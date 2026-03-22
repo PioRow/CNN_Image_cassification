@@ -65,3 +65,20 @@ class MixedCNN(nn.Module):
         return x
 
 
+
+class PrototypicalNet(nn.Module):
+    def __init__(self,backbone,embedding_dim):
+        super(PrototypicalNet, self).__init__()
+        self.backbone = backbone(num_classes=embedding_dim)
+
+    def forward(self,support,query,n_way,k_shot):
+
+        support_embedding = self.backbone(support).view(n_way,k_shot,-1)
+        query_embedding = self.backbone(query)
+
+        prototype_reps=support_embedding.mean(dim=1)
+
+        dist=torch.cdist(query_embedding,prototype_reps)
+        return -dist
+
+
